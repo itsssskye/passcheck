@@ -37,27 +37,51 @@ def check_strength(password):
     else:
         return "Very Strong"
 
-# UI Setup
-root = tk.Tk()
-root.title("Password Strength Checker")
-root.geometry("400x200")
-root.configure(bg="#f2f2f2")
+def get_color_for_strength(strength):
+    colors = {
+        "Empty": "#000000",              # Black
+        "Extremely Weak": "#ff0000",     # Red
+        "Very Weak": "#ff5500",          # Red-Orange
+        "Weak": "#ff9900",               # Orange
+        "Fair": "#ffcc00",               # Yellow
+        "Good": "#aacc00",               # Yellow-Green
+        "Strong": "#66cc00",             # Greenish
+        "Very Strong": "#00cc00",        # Green
+    }
+    return colors.get(strength, "#000000")
 
-def on_check():
+def on_key_release(event=None):
     pw = entry.get()
     result = check_strength(pw)
-    output.config(text="Strength: " + result)
+    color = get_color_for_strength(result)
+    output.config(text="Strength: " + result, fg=color)
 
-title = tk.Label(root, text="Password Strength Checker", font=("Arial", 16, "bold"), bg="#f2f2f2")
-title.pack(pady=10)
+# UI Setup
+root = tk.Tk()
+root.title("PassCheck")
+root.configure(bg="#f2f2f2")
 
-entry = tk.Entry(root, show="*", font=("Arial", 14), width=30)
-entry.pack()
+# Center the window on the screen
+window_width = 400
+window_height = 250
+screen_width = root.winfo_screenwidth()
+screen_height = root.winfo_screenheight()
+x = (screen_width // 2) - (window_width // 2)
+y = (screen_height // 2) - (window_height // 2)
+root.geometry(f"{window_width}x{window_height}+{x}+{y}")
 
-check_button = tk.Button(root, text="Check", command=on_check, font=("Arial", 12), bg="#4CAF50", fg="white")
-check_button.pack(pady=10)
+# Title
+title = tk.Label(root, text="PassCheck", font=("Arial", 18, "bold"), bg="#f2f2f2")
+title.pack(pady=(20, 10))
 
+# Entry
+entry = tk.Entry(root, show="*", font=("Arial", 14), width=30, justify="center")
+entry.pack(pady=5)
+entry.focus()
+entry.bind("<KeyRelease>", on_key_release)
+
+# Output Label
 output = tk.Label(root, text="", font=("Arial", 14), bg="#f2f2f2")
-output.pack()
+output.pack(pady=10)
 
 root.mainloop()
