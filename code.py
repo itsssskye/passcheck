@@ -97,24 +97,24 @@ main_frame = tb.Frame(root, padding=10)
 main_frame.pack(fill="both", expand=True)
 
 # Password label
-label = tb.Label(main_frame, ...)
+label = tb.Label(main_frame, text="Password:")
 label.pack(anchor="w", padx=40, pady=(20, 0))
 label.configure(font=("Segoe UI", 14, "bold"))
 
 # Entry with shadow
-entry_frame = tk.Canvas(main_frame, ...)
+entry_frame = tk.Canvas(main_frame, width=320, height=45, bg="white", highlightthickness=0)
 entry_frame.pack()
 create_rounded_rect(entry_frame, 3, 3, 320, 45, radius=18, fill="#aaaaaa")
 create_rounded_rect(entry_frame, 0, 0, 320, 45, radius=18, fill="#ffffff")
 
 # Real entry
-entry = tb.Entry(main_frame, ...)
-entry.place(x=40, y=80)
+entry = tb.Entry(main_frame, font=("Segoe UI", 12))
+entry.place(x=55, y=88)
 entry.focus()
 entry.bind("<KeyRelease>", on_key_release)
 
 # Progress bar canvas
-progress_canvas = tk.Canvas(main_frame, ...)
+progress_canvas = tk.Canvas(main_frame, width=bar_width, height=bar_height, bg="white", highlightthickness=0)
 progress_canvas.pack(pady=30)
 
 # Initial draw
