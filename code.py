@@ -75,10 +75,10 @@ def on_key_release(event=None):
     progress_canvas.delete("all")
 
     # Shadow
-    create_rounded_rect(progress_canvas, 3, 3, bar_width+3, bar_height+3, radius=15, fill="#cccccc")
+    create_rounded_rect(progress_canvas, 2, 2, bar_width+2, bar_height+2, radius=18, fill="#dddddd")
 
     # Background bar
-    create_rounded_rect(progress_canvas, 0, 0, bar_width, bar_height, radius=15, fill="#ffffff")
+    create_rounded_rect(progress_canvas, 0, 0, bar_width, bar_height, radius=15, fill="#f0f0f0")
 
     # Colored filled portion
     if fill_width > 0:
@@ -93,26 +93,28 @@ root = tb.Window(themename="flatly")
 root.title("PassCheck")
 root.geometry("400x250")
 root.configure(bg="white")
+main_frame = tb.Frame(root, padding=10)
+main_frame.pack(fill="both", expand=True)
 
 # Password label
-label = tb.Label(root, text="Password:", font=("Segoe UI", 12), bootstyle="dark")
+label = tb.Label(main_frame, ...)
 label.pack(anchor="w", padx=40, pady=(20, 0))
 label.configure(font=("Segoe UI", 14, "bold"))
 
 # Entry with shadow
-entry_frame = tk.Canvas(root, width=320, height=45, bg="white", highlightthickness=0)
+entry_frame = tk.Canvas(main_frame, ...)
 entry_frame.pack()
-create_rounded_rect(entry_frame, 3, 3, 320, 45, radius=15, fill="#aaaaaa")
-create_rounded_rect(entry_frame, 0, 0, 320, 45, radius=15, fill="#ffffff")
+create_rounded_rect(entry_frame, 3, 3, 320, 45, radius=18, fill="#aaaaaa")
+create_rounded_rect(entry_frame, 0, 0, 320, 45, radius=18, fill="#ffffff")
 
 # Real entry
-entry = tb.Entry(root, font=("Segoe UI", 14), bootstyle="secondary", width=26)
-entry.place(x=50, y=80)
+entry = tb.Entry(main_frame, ...)
+entry.place(x=40, y=80)
 entry.focus()
 entry.bind("<KeyRelease>", on_key_release)
 
 # Progress bar canvas
-progress_canvas = tk.Canvas(root, width=bar_width, height=bar_height+5, bg="white", highlightthickness=0)
+progress_canvas = tk.Canvas(main_frame, ...)
 progress_canvas.pack(pady=30)
 
 # Initial draw
