@@ -123,23 +123,17 @@ x = (screen_width // 2) - (window_width // 2)
 y = (screen_height // 2) - (window_height // 2)
 root.geometry(f"{window_width}x{window_height}+{x}+{y}")
 
-# Shadow for label "Password:"
-label_shadow = tk.Label(root, text="Password:", font=("Segoe UI", 16), bg="#aaa", fg="#888")
-label_shadow.place(x=102, y=30)
-
-label = tk.Label(root, text="Password:", font=("Segoe UI", 16), bg="#fff", fg="#222")
-label.place(x=100, y=28)
-
 # Canvas for entry background with shadow
 entry_canvas = tk.Canvas(root, width=320, height=40, bg="#fff", highlightthickness=0)
 entry_canvas.place(x=40, y=60)
 create_rounded_rect(entry_canvas, 0, 0, 320, 40, radius=15, fill="#fff")
+
 # Shadow behind entry
 entry_shadow = tk.Canvas(root, width=320, height=40, bg="#aaa", highlightthickness=0)
 entry_shadow.place(x=45, y=65)
 create_rounded_rect(entry_shadow, 0, 0, 320, 40, radius=15, fill="#aaa")
 
-# Entry widget (no password hiding)
+# Entry widget
 entry = tk.Entry(root, font=("Segoe UI", 16), width=30, bd=0, relief="flat", justify="center")
 entry.place(x=50, y=70)
 entry.focus()
