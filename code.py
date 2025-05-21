@@ -112,7 +112,7 @@ def on_key_release(event=None):
 # Setup main window
 root = tk.Tk()
 root.title("PassCheck")
-root.configure(bg="#ffffff")  # White background
+root.configure(bg="#ffffff")
 
 # Center window
 window_width = 400
