@@ -29,7 +29,7 @@ def check_state(password):
     elif score == 5: return "Good", 5
     elif score == 6: return "Strong", 6
     elif score >= 7: return "Extremely Strong", 7
-    return "Very Strong", 6  # fallback
+    return "Very Strong", 6
 
 # State colors
 def get_color_for_state(state):
@@ -96,13 +96,14 @@ root.configure(bg="white")
 
 # Password label
 label = tb.Label(root, text="Password:", font=("Segoe UI", 12), bootstyle="dark")
-label.pack(pady=(20, 5))
+label.pack(anchor="w", padx=40, pady=(20, 0))
+label.configure(font=("Segoe UI", 14, "bold"))
 
 # Entry with shadow
 entry_frame = tk.Canvas(root, width=320, height=45, bg="white", highlightthickness=0)
 entry_frame.pack()
-create_rounded_rect(entry_frame, 3, 3, 320, 45, radius=15, fill="#aaaaaa")  # Shadow
-create_rounded_rect(entry_frame, 0, 0, 320, 45, radius=15, fill="#ffffff")  # Background
+create_rounded_rect(entry_frame, 3, 3, 320, 45, radius=15, fill="#aaaaaa")
+create_rounded_rect(entry_frame, 0, 0, 320, 45, radius=15, fill="#ffffff")
 
 # Real entry
 entry = tb.Entry(root, font=("Segoe UI", 14), bootstyle="secondary", width=26)
