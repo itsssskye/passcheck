@@ -116,7 +116,7 @@ entry.bind("<KeyRelease>", on_key_release)
 
 # Progress bar canvas
 progress_canvas = tk.Canvas(main_frame, width=bar_width, height=bar_height, bg="white", highlightthickness=0)
-progress_canvas.pack(pady=30)
+progress_canvas.pack(pady=(30, 10))
 
 # Initial draw
 on_key_release()
