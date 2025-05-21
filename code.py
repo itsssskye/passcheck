@@ -4,7 +4,6 @@ import tkinter as tk
 import re
 
 # Settings
-bar_width = 300
 bar_height = 30
 max_score = 7
 
@@ -12,7 +11,6 @@ max_score = 7
 def check_state(password):
     score = 0
     length = len(password)
-
     if length >= 6: score += 1
     if length >= 8: score += 1
     if length >= 12: score += 1
@@ -45,81 +43,92 @@ def get_color_for_state(state):
         "Extremely Strong": "#00cc44",
     }.get(state, "#000000")
 
-# Rounded rectangle
-def create_rounded_rect(canvas, x1, y1, x2, y2, radius=10, **kwargs):
-    points = [
-        x1+radius, y1,
-        x2-radius, y1,
-        x2, y1,
-        x2, y1+radius,
-        x2, y2-radius,
-        x2, y2,
-        x2-radius, y2,
-        x1+radius, y2,
-        x1, y2,
-        x1, y2-radius,
-        x1, y1+radius,
-        x1, y1
-    ]
-    return canvas.create_polygon(points, smooth=True, splinesteps=36, **kwargs)
-
 # Update bar
 def on_key_release(event=None):
     pw = entry.get()
     state, score = check_state(pw)
     color = get_color_for_state(state)
 
-    fill_width = int((score / max_score) * bar_width)
+    width = progress_canvas.winfo_width()
+    fill_width = int((score / max_score) * width)
 
-    # Clear canvas
     progress_canvas.delete("all")
 
-    # Shadow
-    create_rounded_rect(progress_canvas, 2, 2, bar_width+2, bar_height+2, radius=18, fill="#dddddd")
-
-    # Background bar
-    create_rounded_rect(progress_canvas, 0, 0, bar_width, bar_height, radius=15, fill="#f0f0f0")
+    # Gray BG
+    progress_canvas.create_round_rect(0, 0, width, bar_height, radius=15, fill="#f2f2f2", outline="")
 
     # Colored filled portion
     if fill_width > 0:
-        create_rounded_rect(progress_canvas, 0, 0, fill_width, bar_height, radius=15, fill=color)
+        progress_canvas.create_round_rect(0, 0, fill_width, bar_height, radius=15, fill=color, outline="")
 
     # Text overlay
     text_color = "#fff" if score >= 4 else "#000"
-    progress_canvas.create_text(bar_width//2, bar_height//2, text=state, fill=text_color, font=("Segoe UI", 14, "bold"))
+    progress_canvas.create_text(width//2, bar_height//2, text=state, fill=text_color, font=("Segoe UI", 14, "bold"))
 
-# Setup window
+# Custom round rect
+def round_rect(canvas):
+    def _create_round_rect(self, x1, y1, x2, y2, radius=25, **kwargs):
+        points = [
+            x1+radius, y1,
+            x2-radius, y1,
+            x2, y1,
+            x2, y1+radius,
+            x2, y2-radius,
+            x2, y2,
+            x2-radius, y2,
+            x1+radius, y2,
+            x1, y2,
+            x1, y2-radius,
+            x1, y1+radius,
+            x1, y1
+        ]
+        return self.create_polygon(points, smooth=True, splinesteps=36, **kwargs)
+    canvas.create_round_rect = _create_round_rect.__get__(canvas)
+
+# Window setup
 root = tb.Window(themename="flatly")
 root.title("PassCheck")
-root.geometry("400x250")
-root.resizable(False, False)
+root.geometry("500x300")
 root.configure(bg="white")
-main_frame = tb.Frame(root, padding=10)
-main_frame.pack(fill="both", expand=True)
 
-# Password label
-label = tb.Label(main_frame, text="Password:")
-label.pack(anchor="w", padx=40, pady=(20, 0))
-label.configure(font=("Segoe UI", 14, "bold"))
+# Main frame
+main = tb.Frame(root, padding=20)
+main.pack(fill="both", expand=True)
 
-# Entry with shadow
-entry_frame = tk.Canvas(main_frame, width=320, height=45, bg="white", highlightthickness=0)
-entry_frame.pack()
-create_rounded_rect(entry_frame, 3, 3, 320, 45, radius=18, fill="#aaaaaa")
-create_rounded_rect(entry_frame, 0, 0, 320, 45, radius=18, fill="#ffffff")
+# Label
+label = tb.Label(main, text="Password", font=("Segoe UI", 14, "bold"), bootstyle="dark")
+label.pack(anchor="w")
 
-# Real entry
-entry = tb.Entry(main_frame, font=("Segoe UI", 12))
-entry.place(x=55, y=88)
+# Entry frame w/ shadow
+entry_wrapper = tk.Frame(main, bg="white")
+entry_wrapper.pack(fill="x", pady=(0, 20))
+
+shadow_canvas = tk.Canvas(entry_wrapper, width=400, height=50, bg="white", highlightthickness=0)
+shadow_canvas.pack(fill="x")
+
+round_rect(shadow_canvas)
+shadow_canvas.create_oval(8, 8, 408, 48, fill="#d0d0d0", outline="")  # Fading-ish shadow
+shadow_canvas.create_oval(5, 5, 405, 45, fill="#ffffff", outline="")
+
+# Entry
+entry = tb.Entry(main, font=("Segoe UI", 14), bootstyle="secondary")
+entry.pack(fill="x", padx=4)
 entry.focus()
 entry.bind("<KeyRelease>", on_key_release)
 
 # Progress bar canvas
-progress_canvas = tk.Canvas(main_frame, width=bar_width, height=bar_height, bg="white", highlightthickness=0)
-progress_canvas.pack(pady=(30, 10))
+progress_canvas = tk.Canvas(main, height=bar_height, bg="white", highlightthickness=0)
+round_rect(progress_canvas)
+progress_canvas.pack(fill="x", pady=(30, 10))
+
+# Update on resize
+def on_resize(event=None):
+    on_key_release()
+
+root.bind("<Configure>", on_resize)
 
 # Initial draw
-on_key_release()
+root.after(100, on_key_release)
 
-# Run app
+# Start
 root.mainloop()
