@@ -1,6 +1,7 @@
 import tkinter as tk
 import re
 
+# Scoring and return system
 def check_strength(password):
     score = 0
     length = len(password)
@@ -37,6 +38,7 @@ def check_strength(password):
     else:
         return "Very Strong"
 
+# Strength Colors
 def get_color_for_strength(strength):
     colors = {
         "Empty": "#000000",              # Black
@@ -50,6 +52,7 @@ def get_color_for_strength(strength):
     }
     return colors.get(strength, "#000000")
 
+# Key Input
 def on_key_release(event=None):
     pw = entry.get()
     result = check_strength(pw)
@@ -61,7 +64,7 @@ root = tk.Tk()
 root.title("PassCheck")
 root.configure(bg="#f2f2f2")
 
-# Center the window on the screen
+# Center
 window_width = 400
 window_height = 250
 screen_width = root.winfo_screenwidth()
@@ -82,6 +85,7 @@ entry.bind("<KeyRelease>", on_key_release)
 
 # Output Label
 output = tk.Label(root, text="", font=("Arial", 14), bg="#f2f2f2")
+output.config(text="Strength: Empty", fg="#000000")
 output.pack(pady=10)
 
 root.mainloop()
