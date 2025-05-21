@@ -92,6 +92,7 @@ def on_key_release(event=None):
 root = tb.Window(themename="flatly")
 root.title("PassCheck")
 root.geometry("400x250")
+root.resizable(False, False)
 root.configure(bg="white")
 main_frame = tb.Frame(root, padding=10)
 main_frame.pack(fill="both", expand=True)
