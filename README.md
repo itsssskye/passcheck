@@ -15,9 +15,10 @@
 
 ## Installation
 
-1. Download the PassCheck.app from the Releases page.
-2. Drag PassCheck.app to your Applications folder (optional but recommended).
-3. Double-click PassCheck.app to launch it.
+1. Download the PassCheck.zip from the Releases page.
+2. Unzip the PassCheck.zip file
+3. Drag PassCheck.app to your Applications folder (optional but recommended).
+4. Double-click PassCheck.app to launch it.
 (If you encounter any problems feel free to open an issue)
 
 ## License
