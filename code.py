@@ -1,7 +1,12 @@
-import ttkbootstrap as tb
-from ttkbootstrap.constants import *
-import tkinter as tk
+import sys
 import re
+from PyQt6.QtWidgets import (
+    QApplication, QWidget, QLabel, QLineEdit, QVBoxLayout,
+    QGraphicsDropShadowEffect, QFrame
+)
+from PyQt6.QtGui import QColor, QPainter, QFont
+from PyQt6.QtCore import Qt
+
 
 # Settings
 bar_height = 30
@@ -43,94 +48,124 @@ def get_color_for_state(state):
         "Extremely Strong": "#00cc44",
     }.get(state, "#000000")
 
-# Update bar
-def on_key_release(event=None):
-    pw = entry.get()
-    state, score = check_state(pw)
-    color = get_color_for_state(state)
+# Main widget
+class PasswordStrengthApp(QWidget):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("PassCheck")
+        self.resize(400, 200)
+        self.setStyleSheet("background-color: white;")
 
-    width = progress_canvas.winfo_width()
-    fill_width = int((score / max_score) * width)
+        # Main frame
+        layout = QVBoxLayout(self)
+        layout.setSpacing(15)
 
-    progress_canvas.delete("all")
+        # Label
+        label = QLabel("Password:")
+        label.setFont(QFont("Segoe UI", 14, QFont.Weight.Bold))
+        label.setStyleSheet("color: #333;")
+        layout.addWidget(label, alignment=Qt.AlignmentFlag.AlignLeft)
 
-    # Gray BG
-    progress_canvas.create_round_rect(0, 0, width, bar_height, radius=15, fill="#f2f2f2", outline="")
+        # Entry w/ shadow
+        self.entry = QLineEdit()
+        self.entry.setFont(QFont("Segoe UI", 14))
+        self.entry.setPlaceholderText("Enter your password...")
+        self.entry.setStyleSheet("""
+            QLineEdit {
+                background-color: #f9f9f9;
+                border: 1px solid #ccc;
+                border-radius: 8px;
+                padding: 8px;
+            }
+        """)
+        self.entry.textChanged.connect(self.update_bar)
 
-    # Colored filled portion
-    if fill_width > 0:
-        progress_canvas.create_round_rect(0, 0, fill_width, bar_height, radius=15, fill=color, outline="")
+        # Shadow for entry
+        shadow = QGraphicsDropShadowEffect(self)
+        shadow.setBlurRadius(15)
+        shadow.setXOffset(0)
+        shadow.setYOffset(4)
+        shadow.setColor(QColor(0, 0, 0, 80))
+        self.entry.setGraphicsEffect(shadow)
 
-    # Text overlay
-    text_color = "#fff" if score >= 4 else "#000"
-    progress_canvas.create_text(width//2, bar_height//2, text=state, fill=text_color, font=("Segoe UI", 14, "bold"))
+        layout.addWidget(self.entry)
 
-# Custom round rect
-def round_rect(canvas):
-    def _create_round_rect(self, x1, y1, x2, y2, radius=25, **kwargs):
-        points = [
-            x1+radius, y1,
-            x2-radius, y1,
-            x2, y1,
-            x2, y1+radius,
-            x2, y2-radius,
-            x2, y2,
-            x2-radius, y2,
-            x1+radius, y2,
-            x1, y2,
-            x1, y2-radius,
-            x1, y1+radius,
-            x1, y1
-        ]
-        return self.create_polygon(points, smooth=True, splinesteps=36, **kwargs)
-    canvas.create_round_rect = _create_round_rect.__get__(canvas)
+        # Progress bar frame w/ shadow
+        self.bar_frame = QFrame()
+        self.bar_frame.setFixedHeight(bar_height)
+        self.bar_frame.setStyleSheet("""
+            QFrame {
+                background-color: #f2f2f2;
+                border-radius: 15px;
+            }
+        """)
 
-# Define window size
-window_width = 400
-window_height = 200
+        # Shadow for progress bar
+        self.bar_shadow = QGraphicsDropShadowEffect(self)
+        self.bar_shadow.setBlurRadius(15)
+        self.bar_shadow.setXOffset(0)
+        self.bar_shadow.setYOffset(4)
+        self.bar_shadow.setColor(QColor(0, 0, 0, 50))
+        self.bar_frame.setGraphicsEffect(self.bar_shadow)
 
-# Get screen width and height
-screen_width = root.winfo_screenwidth()
-screen_height = root.winfo_screenheight()
+        layout.addWidget(self.bar_frame)
 
-# Calculate position
-x = (screen_width - window_width) // 2
-y = (screen_height - window_height) // 2
+        # Text overlay
+        self.state_label = QLabel("")
+        self.state_label.setFont(QFont("Segoe UI", 12, QFont.Weight.Bold))
+        self.state_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.state_label)
 
-# Set the position of the window
-root.geometry(f"{window_width}x{window_height}+{x}+{y}")
+        # Initial values
+        self.score = 0
+        self.color = "#bbbbbb"
 
-# Main frame
-main = tb.Frame(root, padding=20)
-main.pack(fill="both", expand=True)
+        # Start
+        self.show()
 
-# Label
-label = tb.Label(main, text="Password:", font=("Segoe UI", 14, "bold"), bootstyle="dark")
-label.pack(anchor="w")
+    # Update bar
+    def update_bar(self):
+        pw = self.entry.text()
+        state, self.score = check_state(pw)
+        self.color = get_color_for_state(state)
+        self.state_label.setText(state)
+        text_color = "#fff" if self.score >= 4 else "#000"
+        self.state_label.setStyleSheet(f"color: {text_color};")
+        self.repaint()
 
-# Entry frame w/ shadow
-entry_wrapper = tk.Frame(main, bg="white")
-entry_wrapper.pack(fill="x", pady=(0, 20))
+    # Custom paint for filled portion
+    def paintEvent(self, event):
+        super().paintEvent(event)
+        rect = self.bar_frame.geometry()
+        if rect.width() == 0: return
 
-# Entry
-entry = tb.Entry(main, font=("Segoe UI", 14), bootstyle="secondary")
-entry.pack(fill="x", padx=4)
-entry.focus()
-entry.bind("<KeyRelease>", on_key_release)
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        painter.setBrush(QColor(self.color))
+        painter.setPen(Qt.PenStyle.NoPen)
 
-# Progress bar canvas
-progress_canvas = tk.Canvas(main, height=bar_height, bg="white", highlightthickness=0)
-round_rect(progress_canvas)
-progress_canvas.pack(fill="x", pady=(30, 10))
+        fill_width = int((self.score / max_score) * rect.width())
+        if fill_width > 0:
+            painter.drawRoundedRect(rect.x(), rect.y(), fill_width, rect.height(), 15, 15)
 
-# Update on resize
-def on_resize(event=None):
-    on_key_release()
+# Run app
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    root = PasswordStrengthApp()
 
-root.bind("<Configure>", on_resize)
+    # Define window size
+    window_width = 400
+    window_height = 200
 
-# Initial draw
-root.after(100, on_key_release)
+    # Get screen width and height
+    screen_width = app.primaryScreen().size().width()
+    screen_height = app.primaryScreen().size().height()
 
-# Start
-root.mainloop()
+    # Calculate position
+    x = (screen_width - window_width) // 2
+    y = (screen_height - window_height) // 2
+
+    # Set the position of the window
+    root.move(x, y)
+
+    sys.exit(app.exec())
