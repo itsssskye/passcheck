@@ -2,6 +2,7 @@ import ttkbootstrap as tb
 from ttkbootstrap.constants import *
 import tkinter as tk
 import re
+from PIL import Image, ImageTk
 
 # Settings
 bar_height = 30
@@ -90,6 +91,9 @@ root = tb.Window(themename="flatly")
 root.title("PassCheck")
 root.geometry("400x200")
 root.configure(bg="white")
+
+icon_img = ImageTk.PhotoImage(Image.open("icon.png"))
+root.iconphoto(True, icon_img)
 
 # Define window size
 window_width = 400
