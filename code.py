@@ -91,6 +91,21 @@ root.title("PassCheck")
 root.geometry("400x200")
 root.configure(bg="white")
 
+# Define window size
+window_width = 400
+window_height = 200
+
+# Get screen width and height
+screen_width = root.winfo_screenwidth()
+screen_height = root.winfo_screenheight()
+
+# Calculate position
+x = (screen_width - window_width) // 2
+y = (screen_height - window_height) // 2
+
+# Set the position of the window
+root.geometry(f"{window_width}x{window_height}+{x}+{y}")
+
 # Main frame
 main = tb.Frame(root, padding=20)
 main.pack(fill="both", expand=True)
