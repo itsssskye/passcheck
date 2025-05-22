@@ -88,7 +88,7 @@ def round_rect(canvas):
 # Window setup
 root = tb.Window(themename="flatly")
 root.title("PassCheck")
-root.geometry("500x300")
+root.geometry("400x200")
 root.configure(bg="white")
 
 # Main frame
@@ -96,19 +96,12 @@ main = tb.Frame(root, padding=20)
 main.pack(fill="both", expand=True)
 
 # Label
-label = tb.Label(main, text="Password", font=("Segoe UI", 14, "bold"), bootstyle="dark")
+label = tb.Label(main, text="Password:", font=("Segoe UI", 14, "bold"), bootstyle="dark")
 label.pack(anchor="w")
 
 # Entry frame w/ shadow
 entry_wrapper = tk.Frame(main, bg="white")
 entry_wrapper.pack(fill="x", pady=(0, 20))
-
-shadow_canvas = tk.Canvas(entry_wrapper, width=400, height=50, bg="white", highlightthickness=0)
-shadow_canvas.pack(fill="x")
-
-round_rect(shadow_canvas)
-shadow_canvas.create_oval(8, 8, 408, 48, fill="#d0d0d0", outline="")  # Fading-ish shadow
-shadow_canvas.create_oval(5, 5, 405, 45, fill="#ffffff", outline="")
 
 # Entry
 entry = tb.Entry(main, font=("Segoe UI", 14), bootstyle="secondary")
