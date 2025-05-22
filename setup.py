@@ -5,7 +5,7 @@ DATA_FILES = []
 OPTIONS = {
     'argv_emulation': True,
     'packages': ['tkinter', 'ttkbootstrap', 're'],
-    'iconfile': 'icon.icns',  # optional, remove if you don't have one
+    'iconfile': 'icon.icns',
 }
 
 setup(
