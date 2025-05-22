@@ -2,9 +2,9 @@ import sys
 import re
 from PyQt6.QtWidgets import (
     QApplication, QWidget, QLabel, QLineEdit, QVBoxLayout,
-    QGraphicsDropShadowEffect, QFrame
+    QFrame, QGraphicsDropShadowEffect
 )
-from PyQt6.QtGui import QColor, QPainter, QFont
+from PyQt6.QtGui import QColor, QFont
 from PyQt6.QtCore import Qt
 
 
@@ -34,6 +34,7 @@ def check_state(password):
     elif score >= 7: return "Extremely Strong", 7
     return "Very Strong", 6
 
+
 # State colors
 def get_color_for_state(state):
     return {
@@ -48,124 +49,97 @@ def get_color_for_state(state):
         "Extremely Strong": "#00cc44",
     }.get(state, "#000000")
 
-# Main widget
-class PasswordStrengthApp(QWidget):
+
+# Main Window
+class PasswordChecker(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("PassCheck")
-        self.resize(400, 200)
+        self.setFixedSize(420, 250)
         self.setStyleSheet("background-color: white;")
 
-        # Main frame
+        # Main layout
         layout = QVBoxLayout(self)
-        layout.setSpacing(15)
+        layout.setContentsMargins(20, 20, 20, 20)
+        layout.setSpacing(20)
 
         # Label
-        label = QLabel("Password:")
-        label.setFont(QFont("Segoe UI", 14, QFont.Weight.Bold))
-        label.setStyleSheet("color: #333;")
-        layout.addWidget(label, alignment=Qt.AlignmentFlag.AlignLeft)
+        self.label = QLabel("Password:")
+        self.label.setFont(QFont("Segoe UI", 16, QFont.Weight.Bold))
+        self.label.setStyleSheet("color: #333333;")
+        layout.addWidget(self.label)
 
-        # Entry w/ shadow
+        # Entry shadow wrapper
+        self.entry_shadow = QFrame()
+        self.entry_shadow.setStyleSheet("background-color: white; border-radius: 10px;")
+        self.entry_shadow.setFixedHeight(40)
+        shadow = QGraphicsDropShadowEffect()
+        shadow.setBlurRadius(12)
+        shadow.setOffset(0, 3)
+        shadow.setColor(QColor(0, 0, 0, 40))
+        self.entry_shadow.setGraphicsEffect(shadow)
+        layout.addWidget(self.entry_shadow)
+
+        # Entry
         self.entry = QLineEdit()
         self.entry.setFont(QFont("Segoe UI", 14))
-        self.entry.setPlaceholderText("Enter your password...")
+        self.entry.setPlaceholderText("Enter password...")
         self.entry.setStyleSheet("""
             QLineEdit {
-                background-color: #f9f9f9;
-                border: 1px solid #ccc;
-                border-radius: 8px;
+                border: none;
                 padding: 8px;
+                background-color: white;
+                border-radius: 10px;
             }
         """)
+        entry_layout = QVBoxLayout(self.entry_shadow)
+        entry_layout.setContentsMargins(10, 0, 10, 0)
+        entry_layout.addWidget(self.entry)
+
         self.entry.textChanged.connect(self.update_bar)
 
-        # Shadow for entry
-        shadow = QGraphicsDropShadowEffect(self)
-        shadow.setBlurRadius(15)
-        shadow.setXOffset(0)
-        shadow.setYOffset(4)
-        shadow.setColor(QColor(0, 0, 0, 80))
-        self.entry.setGraphicsEffect(shadow)
+        # Bar shadow wrapper
+        self.bar_wrapper = QFrame()
+        self.bar_wrapper.setFixedHeight(bar_height)
+        self.bar_wrapper.setStyleSheet("background-color: #f2f2f2; border-radius: 15px;")
+        bar_shadow = QGraphicsDropShadowEffect()
+        bar_shadow.setBlurRadius(15)
+        bar_shadow.setOffset(0, 4)
+        bar_shadow.setColor(QColor(0, 0, 0, 30))
+        self.bar_wrapper.setGraphicsEffect(bar_shadow)
+        layout.addWidget(self.bar_wrapper)
 
-        layout.addWidget(self.entry)
-
-        # Progress bar frame w/ shadow
-        self.bar_frame = QFrame()
-        self.bar_frame.setFixedHeight(bar_height)
-        self.bar_frame.setStyleSheet("""
-            QFrame {
-                background-color: #f2f2f2;
-                border-radius: 15px;
-            }
-        """)
-
-        # Shadow for progress bar
-        self.bar_shadow = QGraphicsDropShadowEffect(self)
-        self.bar_shadow.setBlurRadius(15)
-        self.bar_shadow.setXOffset(0)
-        self.bar_shadow.setYOffset(4)
-        self.bar_shadow.setColor(QColor(0, 0, 0, 50))
-        self.bar_frame.setGraphicsEffect(self.bar_shadow)
-
-        layout.addWidget(self.bar_frame)
+        # Bar fill
+        self.bar_fill = QFrame(self.bar_wrapper)
+        self.bar_fill.setStyleSheet("background-color: #bbbbbb; border-radius: 15px;")
+        self.bar_fill.setGeometry(0, 0, 0, bar_height)
 
         # Text overlay
-        self.state_label = QLabel("")
-        self.state_label.setFont(QFont("Segoe UI", 12, QFont.Weight.Bold))
+        self.state_label = QLabel(self.bar_wrapper)
+        self.state_label.setFont(QFont("Segoe UI", 14, QFont.Weight.Bold))
         self.state_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.state_label)
+        self.state_label.setStyleSheet("color: #000000;")
+        self.state_label.setGeometry(0, 0, self.bar_wrapper.width(), bar_height)
 
-        # Initial values
-        self.score = 0
-        self.color = "#bbbbbb"
-
-        # Start
-        self.show()
-
-    # Update bar
+    # Update the bar
     def update_bar(self):
-        pw = self.entry.text()
-        state, self.score = check_state(pw)
-        self.color = get_color_for_state(state)
+        password = self.entry.text()
+        state, score = check_state(password)
+        color = get_color_for_state(state)
+
+        width = self.bar_wrapper.width()
+        fill_width = int((score / max_score) * width)
+
+        self.bar_fill.setGeometry(0, 0, fill_width, bar_height)
+        self.bar_fill.setStyleSheet(f"background-color: {color}; border-radius: 15px;")
+
+        text_color = "#ffffff" if score >= 4 else "#000000"
         self.state_label.setText(state)
-        text_color = "#fff" if self.score >= 4 else "#000"
-        self.state_label.setStyleSheet(f"color: {text_color};")
-        self.repaint()
+        self.state_label.setStyleSheet(f"color: {text_color}; font-weight: bold;")
 
-    # Custom paint for filled portion
-    def paintEvent(self, event):
-        super().paintEvent(event)
-        rect = self.bar_frame.geometry()
-        if rect.width() == 0: return
 
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        painter.setBrush(QColor(self.color))
-        painter.setPen(Qt.PenStyle.NoPen)
-
-        fill_width = int((self.score / max_score) * rect.width())
-        if fill_width > 0:
-            painter.drawRoundedRect(rect.x(), rect.y(), fill_width, rect.height(), 15, 15)
-
-# Run app
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    root = PasswordStrengthApp()
-
-    # Define window size
-    window_width = 400
-    window_height = 200
-
-    # Get screen width and height
-    screen_width = app.primaryScreen().size().width()
-    screen_height = app.primaryScreen().size().height()
-
-    # Calculate position
-    x = (screen_width - window_width) // 2
-    y = (screen_height - window_height) // 2
-
-    # Set the position of the window
-    root.move(x, y)
-
-    sys.exit(app.exec())
+# Start
+app = QApplication(sys.argv)
+window = PasswordChecker()
+window.show()
+sys.exit(app.exec())
