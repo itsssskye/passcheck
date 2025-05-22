@@ -85,12 +85,6 @@ def round_rect(canvas):
         return self.create_polygon(points, smooth=True, splinesteps=36, **kwargs)
     canvas.create_round_rect = _create_round_rect.__get__(canvas)
 
-# Window setup
-root = tb.Window(themename="flatly")
-root.title("PassCheck")
-root.geometry("400x200")
-root.configure(bg="white")
-
 # Define window size
 window_width = 400
 window_height = 200
