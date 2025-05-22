@@ -1,12 +1,7 @@
-import sys
+import ttkbootstrap as tb
+from ttkbootstrap.constants import *
+import tkinter as tk
 import re
-from PyQt6.QtWidgets import (
-    QApplication, QWidget, QLabel, QLineEdit, QVBoxLayout,
-    QFrame, QGraphicsDropShadowEffect
-)
-from PyQt6.QtGui import QColor, QFont
-from PyQt6.QtCore import Qt
-
 
 # Settings
 bar_height = 30
@@ -34,7 +29,6 @@ def check_state(password):
     elif score >= 7: return "Extremely Strong", 7
     return "Very Strong", 6
 
-
 # State colors
 def get_color_for_state(state):
     return {
@@ -49,97 +43,100 @@ def get_color_for_state(state):
         "Extremely Strong": "#00cc44",
     }.get(state, "#000000")
 
+# Update bar
+def on_key_release(event=None):
+    pw = entry.get()
+    state, score = check_state(pw)
+    color = get_color_for_state(state)
 
-# Main Window
-class PasswordChecker(QWidget):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("PassCheck")
-        self.setFixedSize(420, 250)
-        self.setStyleSheet("background-color: white;")
+    width = progress_canvas.winfo_width()
+    fill_width = int((score / max_score) * width)
 
-        # Main layout
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(20, 20, 20, 20)
-        layout.setSpacing(20)
+    progress_canvas.delete("all")
 
-        # Label
-        self.label = QLabel("Password:")
-        self.label.setFont(QFont("Segoe UI", 16, QFont.Weight.Bold))
-        self.label.setStyleSheet("color: #333333;")
-        layout.addWidget(self.label)
+    # Gray BG
+    progress_canvas.create_round_rect(0, 0, width, bar_height, radius=15, fill="#f2f2f2", outline="")
 
-        # Entry shadow wrapper
-        self.entry_shadow = QFrame()
-        self.entry_shadow.setStyleSheet("background-color: white; border-radius: 10px;")
-        self.entry_shadow.setFixedHeight(40)
-        shadow = QGraphicsDropShadowEffect()
-        shadow.setBlurRadius(12)
-        shadow.setOffset(0, 3)
-        shadow.setColor(QColor(0, 0, 0, 40))
-        self.entry_shadow.setGraphicsEffect(shadow)
-        layout.addWidget(self.entry_shadow)
+    # Colored filled portion
+    if fill_width > 0:
+        progress_canvas.create_round_rect(0, 0, fill_width, bar_height, radius=15, fill=color, outline="")
 
-        # Entry
-        self.entry = QLineEdit()
-        self.entry.setFont(QFont("Segoe UI", 14))
-        self.entry.setPlaceholderText("Enter password...")
-        self.entry.setStyleSheet("""
-            QLineEdit {
-                border: none;
-                padding: 8px;
-                background-color: white;
-                border-radius: 10px;
-            }
-        """)
-        entry_layout = QVBoxLayout(self.entry_shadow)
-        entry_layout.setContentsMargins(10, 0, 10, 0)
-        entry_layout.addWidget(self.entry)
+    # Text overlay
+    text_color = "#fff" if score >= 4 else "#000"
+    progress_canvas.create_text(width//2, bar_height//2, text=state, fill=text_color, font=("Segoe UI", 14, "bold"))
 
-        self.entry.textChanged.connect(self.update_bar)
+# Custom round rect
+def round_rect(canvas):
+    def _create_round_rect(self, x1, y1, x2, y2, radius=25, **kwargs):
+        points = [
+            x1+radius, y1,
+            x2-radius, y1,
+            x2, y1,
+            x2, y1+radius,
+            x2, y2-radius,
+            x2, y2,
+            x2-radius, y2,
+            x1+radius, y2,
+            x1, y2,
+            x1, y2-radius,
+            x1, y1+radius,
+            x1, y1
+        ]
+        return self.create_polygon(points, smooth=True, splinesteps=36, **kwargs)
+    canvas.create_round_rect = _create_round_rect.__get__(canvas)
 
-        # Bar shadow wrapper
-        self.bar_wrapper = QFrame()
-        self.bar_wrapper.setFixedHeight(bar_height)
-        self.bar_wrapper.setStyleSheet("background-color: #f2f2f2; border-radius: 15px;")
-        bar_shadow = QGraphicsDropShadowEffect()
-        bar_shadow.setBlurRadius(15)
-        bar_shadow.setOffset(0, 4)
-        bar_shadow.setColor(QColor(0, 0, 0, 30))
-        self.bar_wrapper.setGraphicsEffect(bar_shadow)
-        layout.addWidget(self.bar_wrapper)
+# Window setup
+root = tb.Window(themename="flatly")
+root.title("PassCheck")
+root.geometry("400x200")
+root.configure(bg="white")
 
-        # Bar fill
-        self.bar_fill = QFrame(self.bar_wrapper)
-        self.bar_fill.setStyleSheet("background-color: #bbbbbb; border-radius: 15px;")
-        self.bar_fill.setGeometry(0, 0, 0, bar_height)
+# Define window size
+window_width = 400
+window_height = 200
 
-        # Text overlay
-        self.state_label = QLabel(self.bar_wrapper)
-        self.state_label.setFont(QFont("Segoe UI", 14, QFont.Weight.Bold))
-        self.state_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.state_label.setStyleSheet("color: #000000;")
-        self.state_label.setGeometry(0, 0, self.bar_wrapper.width(), bar_height)
+# Get screen width and height
+screen_width = root.winfo_screenwidth()
+screen_height = root.winfo_screenheight()
 
-    # Update the bar
-    def update_bar(self):
-        password = self.entry.text()
-        state, score = check_state(password)
-        color = get_color_for_state(state)
+# Calculate position
+x = (screen_width - window_width) // 2
+y = (screen_height - window_height) // 2
 
-        width = self.bar_wrapper.width()
-        fill_width = int((score / max_score) * width)
+# Set the position of the window
+root.geometry(f"{window_width}x{window_height}+{x}+{y}")
 
-        self.bar_fill.setGeometry(0, 0, fill_width, bar_height)
-        self.bar_fill.setStyleSheet(f"background-color: {color}; border-radius: 15px;")
+# Main frame
+main = tb.Frame(root, padding=20)
+main.pack(fill="both", expand=True)
 
-        text_color = "#ffffff" if score >= 4 else "#000000"
-        self.state_label.setText(state)
-        self.state_label.setStyleSheet(f"color: {text_color}; font-weight: bold;")
+# Label
+label = tb.Label(main, text="Password:", font=("Segoe UI", 14, "bold"), bootstyle="dark")
+label.pack(anchor="w")
 
+# Entry frame w/ shadow
+entry_wrapper = tk.Frame(main, bg="white")
+entry_wrapper.pack(fill="x", pady=(0, 20))
+
+# Entry
+entry = tb.Entry(main, font=("Segoe UI", 14), bootstyle="secondary")
+entry.pack(fill="x", padx=4)
+entry.focus()
+entry.bind("<KeyRelease>", on_key_release)
+
+# Progress bar canvas
+progress_canvas = tk.Canvas(main, height=bar_height, bg="white", highlightthickness=0)
+round_rect(progress_canvas)
+progress_canvas.pack(fill="x", pady=(30, 10))
+
+# Update on resize
+def on_resize(event=None):
+    on_key_release()
+
+root.bind("<Configure>", on_resize)
+
+# Initial draw
+root.after(100, on_key_release)
 
 # Start
-app = QApplication(sys.argv)
-window = PasswordChecker()
-window.show()
-sys.exit(app.exec())
+root.mainloop()
