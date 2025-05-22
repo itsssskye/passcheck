@@ -30,4 +30,4 @@ MIT License. Free to use, remix, or share — just don’t forget to credit!
 ## Credits
 
 Programmer: its.ssskye
-Troubleshooter: ChatGPT
+Debugger: ChatGPT
