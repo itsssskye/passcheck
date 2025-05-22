@@ -2,11 +2,19 @@ import ttkbootstrap as tb
 from ttkbootstrap.constants import *
 import tkinter as tk
 import re
+import sys
+import os
 from PIL import Image, ImageTk
 
 # Settings
 bar_height = 30
 max_score = 7
+
+def resource_path(relative_path):
+    # Use PyInstaller _MEIPASS path if it exists
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, relative_path)
+    return os.path.abspath(relative_path)
 
 # State scoring
 def check_state(password):
@@ -92,7 +100,7 @@ root.title("PassCheck")
 root.geometry("400x200")
 root.configure(bg="white")
 
-icon_img = ImageTk.PhotoImage(Image.open("icon.png"))
+icon_img = ImageTk.PhotoImage(Image.open(resource_path("icon.png")))
 root.iconphoto(True, icon_img)
 
 # Define window size
